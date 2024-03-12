@@ -3,10 +3,10 @@ const {
   createTables,
   createUser,
   createPlace,
-  createVacation,
   fetchUsers,
   fetchPlaces,
   fetchVacations,
+  createVacation,
   destroyVacation,
 } = require('./db');
 
@@ -20,24 +20,8 @@ app.use(express.json());
 app.get('/api/users', async (req, res, next) => {
   try {
     res.send(await fetchUsers());
-  } catch (er) {
-    next(er);
-  }
-});
-
-app.get('/api/places', async (req, res, next) => {
-  try {
-    res.send(await fetchPlaces());
-  } catch (er) {
-    next(er);
-  }
-});
-
-app.get('/api/vacations', async (req, res, next) => {
-  try {
-    res.send(await fetchVacations());
-  } catch (er) {
-    next(er);
+  } catch (ex) {
+    next(ex);
   }
 });
 
@@ -45,40 +29,60 @@ app.delete('/api/users/:userId/vacations/:id', async (req, res, next) => {
   try {
     await destroyVacation({ id: req.params.id, user_id: req.params.userId });
     res.sendStatus(204);
-  } catch (er) {
-    next(er);
+  } catch (ex) {
+    next(ex);
   }
 });
 
-app.post('/api/users/:id/vacations/', async (req, res, next) => {
+app.post('/api/users/:id/vacations', async (req, res, next) => {
   try {
-    res.sendStatus(201).send(
-      await createVacation({
-        user_id: req.params.id,
-        place_id: req.body.place_id,
-        travel_date: req.body.travel_date,
-      })
-    );
-  } catch (er) {
-    next(er);
+    console.log(req.body);
+    res
+      .status(201)
+      .send(
+        await createVacation({
+          user_id: req.params.id,
+          place_id: req.body.place_id,
+          travel_date: req.body.travel_date,
+        })
+      );
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+app.get('/api/places', async (req, res, next) => {
+  try {
+    res.send(await fetchPlaces());
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+app.get('/api/vacations', async (req, res, next) => {
+  try {
+    res.send(await fetchVacations());
+  } catch (ex) {
+    next(ex);
   }
 });
 
 app.use((err, req, res, next) => {
+  console.log(err);
   res.status(err.status || 500).send({ error: err.message || err });
 });
 
 const init = async () => {
-  console.log('connecting to db');
+  console.log('connecting to database');
   await client.connect();
-  console.log('connected to db');
+  console.log('connected to database');
   await createTables();
   console.log('tables created');
-  const [moe, lucy, larry, berlin, barcelona, seoul, london] =
+  const [moe, lucy, ethyl, berlin, barcelona, seoul, london] =
     await Promise.all([
       createUser({ name: 'moe' }),
       createUser({ name: 'lucy' }),
-      createUser({ name: 'larry' }),
+      createUser({ name: 'ethyl' }),
       createPlace({ name: 'berlin' }),
       createPlace({ name: 'barcelona' }),
       createPlace({ name: 'seoul' }),
@@ -107,11 +111,13 @@ const init = async () => {
   console.log(await fetchVacations());
 
   await destroyVacation(vacations[0]);
+
   console.log(await fetchVacations());
 
   const port = process.env.PORT || 3001;
   app.listen(port, () => {
     console.log(`listening on port ${port}`);
+    console.log('TEST OUT APP WITH curl:');
     console.log(`curl localhost:${port}/api/users`);
     console.log(`curl localhost:${port}/api/places`);
     console.log(`curl localhost:${port}/api/vacations`);
@@ -119,7 +125,7 @@ const init = async () => {
       `curl -X DELETE localhost:${port}/api/users/${moe.id}/vacations/${vacations[1].id}`
     );
     console.log(
-      `curl -X POST localhost:${port}/api/users/${larry.id}/vacations -d '{"travel_date': "04/01/2025", "place_id": "${seoul.id} -H "Content-Type:application/json"}`
+      `curl -X POST localhost:${port}/api/users/${ethyl.id}/vacations -d '{"travel_date": "04/01/2025", "place_id": "${seoul.id}"}' -H "Content-Type:application/json"`
     );
   });
 };
