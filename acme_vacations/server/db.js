@@ -39,8 +39,65 @@ const createUser = async ({ name }) => {
   return response.rows[0];
 };
 
+const createPlace = async ({ name }) => {
+  const SQL = `
+          INSERT INTO places(id, name)
+          VALUES($1, $2)
+          RETURNING *
+      `;
+  const response = await client.query(SQL, [uuid.v4(), name]);
+  return response.rows[0];
+};
+
+const createVacation = async ({ user_id, place_id, travel_date }) => {
+  const SQL = `
+            INSERT INTO vacations(id, user_id, place_id, travel_date)
+            VALUES($1, $2, $3, $4)
+            RETURNING *
+        `;
+  const response = await client.query(SQL, [
+    uuid.v4(),
+    user_id,
+    place_id,
+    travel_date,
+  ]);
+  return response.rows[0];
+};
+
+const fetchUsers = async () => {
+  const SQL = `
+        SELECT *
+        FROM users;
+        `;
+  const response = await client.query(SQL);
+  return response.rows;
+};
+
+const fetchPlaces = async () => {
+  const SQL = `
+          SELECT *
+          FROM places;
+          `;
+  const response = await client.query(SQL);
+  return response.rows;
+};
+
+const fetchVacations = async () => {
+  const SQL = `
+            SELECT *
+            FROM vacations;
+            `;
+  const response = await client.query(SQL);
+  return response.rows;
+};
+
 module.exports = {
   client,
   createTables,
   createUser,
+  createPlace,
+  createVacation,
+  fetchUsers,
+  fetchPlaces,
+  fetchVacations,
 };
