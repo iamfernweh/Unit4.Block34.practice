@@ -31,11 +31,11 @@ const createTables = async () => {
 
 const createUser = async ({ name }) => {
   const SQL = `
-        INSERT INTO users(name)
-        VALUES($1)
+        INSERT INTO users(id, name)
+        VALUES($1, $2)
         RETURNING *
     `;
-  const response = await client.query(SQL, [name]);
+  const response = await client.query(SQL, [uuid.v4(), name]);
   return response.rows[0];
 };
 
