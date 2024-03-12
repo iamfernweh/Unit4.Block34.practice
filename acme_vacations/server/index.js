@@ -7,6 +7,7 @@ const {
   fetchPlaces,
   createVacation,
   fetchVacations,
+  destroyVacation,
 } = require('./db');
 
 const init = async () => {
@@ -45,6 +46,9 @@ const init = async () => {
       travel_date: '04/01/2024',
     }),
   ]);
+  console.log(await fetchVacations());
+
+  await destroyVacation(vacations[0]);
   console.log(await fetchVacations());
 };
 
