@@ -3,12 +3,42 @@ const {
   createTables,
   createUser,
   createPlace,
+  createVacation,
   fetchUsers,
   fetchPlaces,
-  createVacation,
   fetchVacations,
   destroyVacation,
 } = require('./db');
+
+const express = require('express');
+const morgan = require('morgan');
+const app = express();
+
+app.use(morgan('dev'));
+
+app.get('/api/users', async (req, res, next) => {
+  try {
+    res.send(await fetchUsers());
+  } catch (er) {
+    next(er);
+  }
+});
+
+app.get('/api/places', async (req, res, next) => {
+  try {
+    res.send(await fetchPlaces());
+  } catch (er) {
+    next(er);
+  }
+});
+
+app.get('/api/vacations', async (req, res, next) => {
+  try {
+    res.send(await fetchVacations());
+  } catch (er) {
+    next(er);
+  }
+});
 
 const init = async () => {
   console.log('connecting to db');
@@ -50,6 +80,14 @@ const init = async () => {
 
   await destroyVacation(vacations[0]);
   console.log(await fetchVacations());
+
+  const port = process.env.PORT || 3001;
+  app.listen(port, () => {
+    console.log(`listening on port ${port}`);
+    console.log(`curl localhost:${port}/api/users`);
+    console.log(`curl localhost:${port}/api/places`);
+    console.log(`curl localhost:${port}/api/vacations`);
+  });
 };
 
 init();
